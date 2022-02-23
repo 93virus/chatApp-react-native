@@ -1,48 +1,69 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
 import { Button, Input, Image } from 'react-native-elements';
 import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-const Login = () => {
+const Login = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const signIn = () => {
+    const [hidePassword, setHidePassword] = useState(true);
 
+    const signIn = () => {
     }
 
     return (
-        <KeyboardAvoidingView>
-            <ScrollView contentContainerStyle={styles.container}>
+        <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+            <View style={{ alignItems: 'center'}}>
             <StatusBar style='light' />
-            <Image source={require("../assets/signal.png")} style={{ width: 200, height: 200}} />
+            <Image source={require("../assets/signal.png")} style={{ width: 200, height: 200 }} />
             <View style={styles.inputContainer}>
                 <Input
                 placeholder='Email' 
-                autoFocus type="email" 
+                type="email" 
+                autoCapitalize='none'
                 value={email} 
                 onChangeText={(text) => setEmail(text)}
+                leftIcon={
+                    <MaterialIcons name="email" size={24} color="#99A3A4" />
+                }
                 />
 
                 <Input placeholder='Password' 
-                secureTextEntry 
+                secureTextEntry={hidePassword}
+                autoCapitalize='none'
                 type="Password" 
                 value={password} 
                 onChangeText={(text) => setPassword(text)}
+                leftIcon={
+                    <MaterialIcons name="lock" size={24} color="#99A3A4" />
+                }
+                rightIcon={
+                    (hidePassword) ?
+                    <TouchableOpacity onPress={() => setHidePassword(!hidePassword)}>
+                    <Ionicons name="eye" size={24} color="#99A3A4" />
+                    </TouchableOpacity> 
+                    :
+                    <TouchableOpacity onPress={() => setHidePassword(!hidePassword)}>
+                    <Ionicons name="eye-off" size={24} color="#99A3A4" />
+                    </TouchableOpacity>
+                }
                 />
             </View>
 
-            <Button title="Login" containerStyle={styles.button} onPress={signIn} />
-            <Button title="Register" containerStyle={styles.button} type="outline" />
-            <View style={{height: 50}} />
-            </ScrollView>
+            <Button title="Login" containerStyle={[styles.button]} onPress={signIn} buttonStyle={{backgroundColor: '#2C6BED'}} />
+            <Button title="Register" containerStyle={styles.button} type="outline" onPress={() => navigation.navigate('Register')} />
+            </View>
         </KeyboardAvoidingView>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
-        height: '100%',
+        flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'white',
