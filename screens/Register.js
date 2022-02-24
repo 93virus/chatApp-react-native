@@ -6,6 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { auth, storage } from '../firebase';
+import { Wave } from 'react-native-animated-spinkit'
 
 const Register = ({ navigation }) => {
     useLayoutEffect(() => {
@@ -17,30 +19,86 @@ const Register = ({ navigation }) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [imageUrl, setImageUrl] = useState('');
+    const [imageUri, setImageUri] = useState('');
     
     const [hidePassword, setHidePassword] = useState(true);
+
+    const [loading, setLoading] = useState(false);
+    const [nameErr, setNameErr] = useState('');
+    const [emailErr, setEmailErr] = useState('');
+    const [passwordErr, setPasswordErr] = useState('');
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            aspect: [5, 5],
             quality: 0.7
         });
         if (!result.cancelled) {
-            setImageUrl(result.uri);
-            console.log(imageUrl);
+            setImageUri(result.uri);
         }
     }
 
-    const uploadImage = async (imageUrl) => {
-        const response = await fetch(imageUrl);
+    const uploadImage = async (imageUri) => {
+        const response = await fetch(imageUri);
         const blob = await response.blob();
+        var ref = await storage.ref().child('profileImg/'+email);
+        await ref.put(blob);
+        const url = await storage.ref().child('profileImg/'+email).getDownloadURL();
+        return url;
     }
 
     const register = async () => {
-        
+        setEmailErr('');
+        setNameErr('');
+        setPasswordErr('');
+        setLoading(true);
+        let flag = 1;
+        if (name == '') {   
+            setNameErr("Name is required!");
+            flag = 0;
+        }
+        if (email == '') {
+            setEmailErr("Email address is required!");
+            flag = 0;
+        }
+        if (password == '') {
+            setPasswordErr("Password is required!");
+            flag = 0;
+        }
+        if (flag == 0) {
+            setLoading(false);
+            return;
+        }
+        await auth.createUserWithEmailAndPassword(email, password)
+        .then(async (authUser) => {
+            let url = "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png?20170328184010"
+            if (imageUri) {
+                url = await uploadImage(imageUri);
+            }
+            await authUser.user.updateProfile({
+                displayName: name.trim(),
+                photoURL: url
+            })
+        })
+        .then(() => {
+            setLoading(false);
+        })
+        .catch(err => {
+            setLoading(false);
+            switch(err.code) {
+                case 'auth/email-already-in-use':
+                    setEmailErr("Email address already in use!");
+                    break;
+                case 'auth/invalid-email':
+                    setEmailErr("Email address is invalid!");
+                    break;
+                case 'auth/weak-password':
+                    setPasswordErr("Password is not strong enough!");
+                    break;
+                default: alert(err.message);
+            }
+        })
     }
 
     return (
@@ -53,7 +111,7 @@ const Register = ({ navigation }) => {
 
             <View style={styles.inputContainer}>
                 <View style={styles.profileImgContainer}>
-                    <Image style={styles.profileImg} source={require('../assets/profile.png')} />
+                    <Image style={styles.profileImg} source={(!imageUri) ? require('../assets/profile.png') : {uri: imageUri}} />
                     <TouchableHighlight activeOpacity={0.6} underlayColor="#fff" onPress={() => pickImage()} style={styles.addIconContainer}>
                     <Ionicons name="add-circle" size={70} color="#2c6bed" style={styles.addIcon} />
                     </TouchableHighlight>
@@ -62,14 +120,18 @@ const Register = ({ navigation }) => {
                 value={name} onChangeText={(text) => setName(text)} 
                 leftIcon={
                     <MaterialCommunityIcons name="account" size={24} color="#99A3A4" />
-                }/>
+                }
+                errorMessage={nameErr}
+                />
 
                 <Input type="email" autoCapitalize='none'
                 placeholder='Email' value={email} 
-                onChangeText={(text) => setEmail(text)} 
+                onChangeText={(text) => setEmail(text.trim())} 
                 leftIcon={
                     <MaterialIcons name="email" size={24} color="#99A3A4" />
-                }/>
+                }
+                errorMessage={emailErr}
+                />
 
                 <Input type="text" autoCapitalize='none' 
                 secureTextEntry={hidePassword} placeholder='Password' value={password} 
@@ -87,10 +149,15 @@ const Register = ({ navigation }) => {
                     <Ionicons name="eye-off" size={24} color="#99A3A4" />
                     </TouchableOpacity>
                 }
-                onSubmitEditing={register} />
+                onSubmitEditing={register} 
+                errorMessage={passwordErr}
+                />
             </View>
-
-            <Button raised title="Register" onPress={() => register()} containerStyle={styles.button} buttonStyle={{ backgroundColor: '#2C6BED'}} />
+            {(loading) ? (
+                <Wave size={48} color="#2C6BED" style={{ marginTop: 10 }} />
+            ) : (
+                <><Button raised title="Register" onPress={() => register()} containerStyle={styles.button} buttonStyle={{ backgroundColor: '#2C6BED'}} /></>
+            )}
         </KeyboardAvoidingView>
     )
 }
