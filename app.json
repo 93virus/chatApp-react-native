@@ -10,13 +10,16 @@
         }
       ]
     ],
-    "name": "signal-clone",
-    "slug": "signal-clone",
+    "notification": {
+      "icon": "./assets/signal-96.png"
+    },
+    "name": "Babble",
+    "slug": "babble",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/chat.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/signal.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -28,16 +31,29 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.signal-clone.com"
+      "bundleIdentifier": "com.signal-clone.com",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "The app accesses your photos to let you share them with your friends.",
+        "NSCameraUsageDescription": "The app accesses your camera to let you share them with your friends.",
+        "NSMicrophoneUsageDescription": "The app accesses your microphone to record audio and let you share them with your friends."
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/signal.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "chat.babble.com",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/signal.png"
     }
   }
 }

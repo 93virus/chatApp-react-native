@@ -1,15 +1,16 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useLayoutEffect, useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, Image, TouchableHighlight, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, KeyboardAvoidingView, Platform, Image, TouchableHighlight, TouchableOpacity, Alert } from 'react-native';
 import { Button, Text, Input } from 'react-native-elements';
 import { Ionicons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { auth, storage } from '../firebase';
+import { auth, storage, db } from '../firebase';
 import { Wave } from 'react-native-animated-spinkit'
 
 const Register = ({ navigation }) => {
+
     useLayoutEffect(() => {
         navigation.setOptions({
             headerBackTitle: "Back to Login"
@@ -79,6 +80,13 @@ const Register = ({ navigation }) => {
             await authUser.user.updateProfile({
                 displayName: name.trim(),
                 photoURL: url
+            });
+            await db.collection('users').doc(authUser.user.uid)
+            .set({
+                'uid': authUser.user.uid,
+                'name': name.trim(),
+                'profileImg': url,
+                'email': email.trim()
             })
         })
         .then(() => {

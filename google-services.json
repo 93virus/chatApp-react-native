@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "230836216624",
+    "firebase_url": "https://signal-clone-d015b-default-rtdb.firebaseio.com",
+    "project_id": "signal-clone-d015b",
+    "storage_bucket": "signal-clone-d015b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:230836216624:android:c65b9d23019f9d8eee5ef5",
+        "android_client_info": {
+          "package_name": "chat.babble.com"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "230836216624-8hf0eorojmjbrq9qdq86ea8rkoo6cumv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGPg80uL6pfYPy5PdsQ21wCsQ1bbSGk6o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "230836216624-8hf0eorojmjbrq9qdq86ea8rkoo6cumv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

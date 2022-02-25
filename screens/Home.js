@@ -1,18 +1,24 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useLayoutEffect } from 'react';
-import { SafeAreaView, ScrollView, View, Text, Platform, TouchableOpacity } from 'react-native';
+import React, { useLayoutEffect, useEffect } from 'react';
+import { SafeAreaView, ScrollView, View, Text, Platform, TouchableOpacity, Alert } from 'react-native';
 import { AntDesign, SimpleLineIcons } from '@expo/vector-icons';
 import { Avatar } from 'react-native-elements';
 import CustomListItem from '../components/CustomListItem';
 import { auth } from '../firebase';
+import { registerForPushNotificationsAsync, sendNotificationToAllUsers } from '../ExpoNotification';
 
 const Home = ({ navigation }) => {
-
+    
     const signOutUser = () => {
         auth.signOut().then(() => {
             navigation.replace("Login");
         })
     }
+
+    useEffect(() => {
+        registerForPushNotificationsAsync();
+    }, [])
+    
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -47,6 +53,9 @@ const Home = ({ navigation }) => {
             <StatusBar style='light' />
             <ScrollView>
                 <CustomListItem />
+                <TouchableOpacity onPress={sendNotificationToAllUsers}>
+                    <Text>Send Notification</Text>
+                </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>
     )
