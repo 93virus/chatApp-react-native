@@ -3,8 +3,9 @@ import React from 'react'
 import { ListItem, Avatar } from 'react-native-elements'
 
 const CustomListItem = ({ id, chatName, enterChat }) => {
+
   return (
-    <ListItem>
+    <ListItem key={id} bottomDivider onPress={() => enterChat(id, chatName)}>
       <Avatar
         rounded
         source={{
@@ -12,7 +13,7 @@ const CustomListItem = ({ id, chatName, enterChat }) => {
         }}
       />
       <ListItem.Content>
-        <ListItem.Title style={{ fontWeight: 'bold' }}>Itachi</ListItem.Title>
+        <ListItem.Title style={{ fontWeight: 'bold' }}>{chatName}</ListItem.Title>
         <ListItem.Subtitle numberOfLines={1} ellipsizeMode="tail">
         Those who cannot acknowledge themselves, will eventually fail
         </ListItem.Subtitle>
