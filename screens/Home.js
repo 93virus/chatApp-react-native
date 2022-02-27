@@ -37,8 +37,11 @@ const Home = ({ navigation }) => {
                 <TouchableOpacity activeOpacity={0.5} onPress={signOutUser}>
                 <Avatar
                     rounded
-                    source={{ uri: auth?.currentUser?.photoURL }}    
-                />
+                    source={{
+                        uri: auth?.currentUser?.photoURL
+                    }}
+                    placeholderStyle={{ backgroundColor: 'transparent'}}
+                    />
                 </TouchableOpacity>
             </View>,
             headerRight: () =>

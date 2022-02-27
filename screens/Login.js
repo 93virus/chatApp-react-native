@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
-import { Button, Input, Image } from 'react-native-elements';
+import { View, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Image } from 'react-native';
+import { Button, Input } from 'react-native-elements';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -89,7 +89,7 @@ const Login = ({ navigation }) => {
         <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
             <View style={{ alignItems: 'center'}}>
             <StatusBar style='light' />
-            <Image source={require("../assets/signal.png")} style={{ width: 200, height: 200 }} />
+            <Image source={require('../assets/signal.png')} style={{ width: 200, height: 200 }} />
             <View style={styles.inputContainer}>
                 <Input
                 placeholder='Email' 

@@ -34,6 +34,7 @@ const AddChat = ({ navigation }) => {
       leftIcon={
           <MaterialCommunityIcons name='chat-plus' size={24} color="#99A3A4" />
       }
+      style={{ outlineStyle: 'none' }}
       />
       <Button onPress={createChat} title='Create a new chat' buttonStyle={{ backgroundColor: '#2c6bed' }} />
     </View>

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet } from 'react-native'
 import React from 'react'
 import { ListItem, Avatar } from 'react-native-elements'
 
@@ -11,6 +11,7 @@ const CustomListItem = ({ id, chatName, enterChat }) => {
         source={{
             uri: "https://avatars.githubusercontent.com/u/12928248?v=4"
         }}
+        placeholderStyle={{ backgroundColor: 'transparent'}}
       />
       <ListItem.Content>
         <ListItem.Title style={{ fontWeight: 'bold' }}>{chatName}</ListItem.Title>

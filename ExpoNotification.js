@@ -5,6 +5,7 @@ import * as Notifications from 'expo-notifications';
 
 const registerForPushNotificationsAsync = async () => {
     let token;
+    if (Platform.OS == 'web') return;
     if (Device.isDevice) {
         const {status: existingStatus} = await Notifications.getPermissionsAsync();
         let finalStatus = existingStatus;
