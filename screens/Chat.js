@@ -4,6 +4,7 @@ import { Avatar } from 'react-native-elements/dist/avatar/Avatar';
 import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons';
 import { auth, db } from '../firebase';
 import firebase from 'firebase';
+import { sendMessagePushNotification } from '../ExpoNotification';
 
 export default function Chat({ navigation, route }) {
 
@@ -55,7 +56,7 @@ export default function Chat({ navigation, route }) {
 
   useLayoutEffect(() => {
     const unsubscribe = db.collection('chats').doc(route.params.id).collection('messages')
-    .orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+    .orderBy('timestamp', 'asc').onSnapshot(snapshot => {
       setMessages(snapshot.docs.map(doc => ({
         id: doc.id,
         data: doc.data()
@@ -73,6 +74,8 @@ export default function Chat({ navigation, route }) {
       displayName: auth.currentUser.displayName,
       email: auth.currentUser.email,
       photoURL: auth.currentUser.photoURL
+    }).then(() => {
+      sendMessagePushNotification({title: route.params.chatName, body: auth.currentUser.displayName + " : " + input.trim()})
     })
     setInput('')
   }
@@ -85,16 +88,54 @@ export default function Chat({ navigation, route }) {
         keyboardVerticalOffset={60}
       >
         <>
-        <ScrollView>
+        <ScrollView contentContainerStyle={{ paddingTop: 15 }}>
           {
             messages.map(({id, data}) => (
               data.email === auth.currentUser.email ? (
-                <View>
-
+                <View key={id} style={styles.receiver}>
+                  <Avatar 
+                  rounded
+                  source={{
+                    uri: data.photoURL
+                  }}
+                  position='absolute'
+                  right={-5}
+                  size={30}
+                  bottom={-15}
+                  containerStyle={{
+                    position: 'absolute',
+                    right: -5,
+                    bottom: -15
+                  }}
+                  placeholderStyle={{backgroundColor: 'transparent'}}
+                  />
+                  <Text style={styles.receiverText}>{data.message}</Text>
                 </View>
               ) : (
-                <View>
-
+                <View style={styles.sender} id={id}>
+                  <Text style={{ color: '#000', fontSize: 12, backgroundColor: '#fff', borderRadius: 10, paddingTop: 3, paddingLeft: 10, paddingRight: 10, paddingBottom: 3, marginLeft: 5, alignSelf: 'flex-start' }}>{data.displayName}</Text>
+                  <Avatar 
+                  rounded
+                  source={{
+                    uri: data.photoURL
+                  }}
+                  position='absolute'
+                  left={-5}
+                  size={30}
+                  bottom={-15}
+                  containerStyle={{
+                    position: 'absolute',
+                    left: -5,
+                    bottom: -15,
+                  }}
+                  placeholderStyle={{backgroundColor: 'transparent'}}
+                  />
+                  <Text style={styles.senderText}>{data.message}</Text>
+                  <Text style={{
+                    color: '#fff',
+                    alignSelf: 'flex-end',
+                    fontSize: 12
+                  }}>{new Date(data.timestamp.seconds * 1000 + data.timestamp.nanoseconds/1000000).getHours() + ":" + new Date(data.timestamp.seconds * 1000 + data.timestamp.nanoseconds/1000000).getMinutes()}</Text>
                 </View>
               )
             ))
@@ -140,6 +181,39 @@ const styles = StyleSheet.create({
     padding: 15,
     color: 'grey',
     borderRadius: 30,
-    fontSize: 17
+    fontSize: 17,
+  }, 
+  receiver: {
+    alignSelf: 'flex-end',
+    padding: 15,
+    backgroundColor: '#ececec',
+    borderRadius: 20,
+    maxWidth: '80%',
+    position: 'relative',
+    marginRight: 15,
+    marginBottom: 20
+  },
+  sender: {
+    padding: 15,
+    backgroundColor: '#2C6BED',
+    borderRadius: 20,
+    maxWidth: '80%',
+    position: 'relative',
+    alignSelf: 'flex-start',
+    marginLeft: 15,
+    marginBottom: 20,
+    minWidth: 120
+  },
+  senderText: {
+    color: '#F0F3F4',
+    fontWeight: '500',
+    marginLeft: 10,
+    marginBottom: 15,
+    marginTop: 5
+  },
+  receiverText: {
+    color: '#000',
+    fontWeight: '500',
+    marginRight: 10,
   }
 })

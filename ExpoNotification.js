@@ -20,14 +20,14 @@ const registerForPushNotificationsAsync = async () => {
     } else {
         alert('Physical device must be used for push notifications!');
     }
-    // if (Platform.OS === 'android') {
-    //     Notifications.setNotificationChannelAsync('default', {
-    //         name: 'default',
-    //         importance: Notifications.AndroidImportance.MAX,
-    //         vibrationPattern: [0, 250, 250, 250],
-    //         lightColor: '#FF231F7C',
-    //     })
-    // }
+    if (Platform.OS === 'android') {
+        Notifications.setNotificationChannelAsync('default', {
+            name: 'default',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+        })
+    }
     try {
         db.collection('users').doc(auth.currentUser.uid)
         .update({
@@ -81,7 +81,17 @@ const sendLocalNotification = async (msg) => {
     })
 }
 
+const sendMessagePushNotification = async (msg) => {
+    const users = await db.collection('users').get();
+    users.docs.map(user => {
+        if (user.data().uid != auth.currentUser.uid) {
+            sendNotification(user.data().expoToken, msg)
+        }
+    })
+}
+
 export { registerForPushNotificationsAsync, 
     sendNotification, 
     sendNotificationToAllUsers,
-    sendLocalNotification };
+    sendLocalNotification,
+    sendMessagePushNotification };
