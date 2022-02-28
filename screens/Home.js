@@ -5,7 +5,16 @@ import { AntDesign, SimpleLineIcons } from '@expo/vector-icons';
 import { Avatar } from 'react-native-elements';
 import CustomListItem from '../components/CustomListItem';
 import { auth, db } from '../firebase';
-import { registerForPushNotificationsAsync, sendNotificationToAllUsers } from '../ExpoNotification';
+import { registerForPushNotificationsAsync, sendLocalNotification, sendNotificationToAllUsers } from '../ExpoNotification';
+import * as Notifications from 'expo-notifications';
+
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    }),
+});
 
 const Home = ({ navigation }) => {
 
@@ -77,6 +86,9 @@ const Home = ({ navigation }) => {
                     <CustomListItem key={id} id={id} chatName={chatName} enterChat={enterChat} />
                 ))
             }
+            <TouchableOpacity onPress={() => sendNotificationToAllUsers({title: "Demo", body: "Test Notification"})}>
+                <Text>Send</Text>
+            </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>
     )

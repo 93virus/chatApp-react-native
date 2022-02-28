@@ -1,5 +1,7 @@
-import { StyleSheet } from 'react-native';
-import * as React from 'react';
+import { Alert, Platform, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import * as Updates from 'expo-updates';
+import * as Notifications from 'expo-notifications';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from './screens/Login';
@@ -8,16 +10,52 @@ import Home from './screens/Home';
 import AddChat from './screens/AddChat';
 import Chat from './screens/Chat';
 import './firebase';
+import { sendLocalNotification } from './ExpoNotification';
 
 const Stack = createNativeStackNavigator();
 
 const globalScreenOptions = {
   headerStyle: { backgroundColor: "#2C6BED" },
-  headerTitleStyle: { color: "white" },
-  headerTintColor: "white"
+  headerTitleStyle: { color: "#fff" },
+  headerTintColor: "#fff"
 }
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
+
 export default function App() {
+
+  useEffect(() => {
+    if (Platform.OS != 'web') {
+      reactToUpdates();
+    }
+  })
+
+  const reactToUpdates = async () => {
+    Updates.addListener((event) => {
+      if (event.type === Updates.UpdateEventType.UPDATE_AVAILABLE) {
+        Alert.alert("Reload", "Reload the app to automatically update!", [
+          {
+            text: "Later",
+            style: "cancel"
+          },
+          {
+            text: "Reload",
+            onPress: () => {
+              sendLocalNotification({title: "Hurray! Babble is Updated..", body: ""});
+              Updates.reloadAsync()
+            }
+          }
+        ]);
+      }
+    })
+  }
+
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={globalScreenOptions}>

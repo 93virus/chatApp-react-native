@@ -1,4 +1,4 @@
-import { Platform, Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { auth, db } from './firebase';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
@@ -20,17 +20,17 @@ const registerForPushNotificationsAsync = async () => {
     } else {
         alert('Physical device must be used for push notifications!');
     }
-    if (Platform.OS === 'android') {
-        Notifications.setNotificationChannelAsync('default', {
-            name: 'default',
-            importance: Notifications.AndroidImportance.MAX,
-            vibrationPattern: [0, 250, 250, 250],
-            lightColor: '#FF231F7C',
-        })
-    }
+    // if (Platform.OS === 'android') {
+    //     Notifications.setNotificationChannelAsync('default', {
+    //         name: 'default',
+    //         importance: Notifications.AndroidImportance.MAX,
+    //         vibrationPattern: [0, 250, 250, 250],
+    //         lightColor: '#FF231F7C',
+    //     })
+    // }
     try {
         db.collection('users').doc(auth.currentUser.uid)
-        .set({
+        .update({
             'expoToken': token
         })
         .then(() => {
@@ -41,17 +41,18 @@ const registerForPushNotificationsAsync = async () => {
     }
 }
 
-const sendNotification = async (token) => {
+const sendNotification = async (token, msg) => {
     const message = {
         to: token,
         sound: 'default',
-        title: 'Original Title',
-        body: 'And here is the body!',
+        title: msg.title,
+        body: msg.body,
         data: { someData: 'goes here' },
     };
 
     await fetch('https://exp.host/--/api/v2/push/send', {
         method: 'POST',
+        mode: 'no-cors',
         headers: {
         Accept: 'application/json',
         'Accept-encoding': 'gzip, deflate',
@@ -61,13 +62,26 @@ const sendNotification = async (token) => {
     });
 }
 
-const sendNotificationToAllUsers = async () => {
+const sendNotificationToAllUsers = async (msg) => {
     const users = await db.collection('users').get();
     users.docs.map(user => {
-        sendNotification(user.data().expoToken)
+        sendNotification(user.data().expoToken, msg)
+    })
+}
+
+const sendLocalNotification = async (msg) => {
+    Notifications.scheduleNotificationAsync({
+        content: {
+            title: msg.title,
+            body: msg.body
+        },
+        trigger: {
+            seconds: 2
+        }
     })
 }
 
 export { registerForPushNotificationsAsync, 
     sendNotification, 
-    sendNotificationToAllUsers };
+    sendNotificationToAllUsers,
+    sendLocalNotification };
