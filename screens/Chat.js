@@ -1,15 +1,17 @@
 import { StyleSheet, Text, View, TouchableOpacity, Platform, SafeAreaView, KeyboardAvoidingView, ScrollView, TextInput, Keyboard } from 'react-native'
-import React, { useLayoutEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Avatar } from 'react-native-elements/dist/avatar/Avatar';
 import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons';
 import { auth, db } from '../firebase';
 import firebase from 'firebase';
 import { sendMessagePushNotification } from '../ExpoNotification';
 
+
 export default function Chat({ navigation, route }) {
 
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
+  const scrollViewRef = useRef();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -67,6 +69,7 @@ export default function Chat({ navigation, route }) {
   }, [route])
 
   const sendMessage = () => {
+    if (!input) return;
     Keyboard.dismiss();
     db.collection('chats').doc(route.params.id).collection('messages').add({
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
@@ -80,6 +83,7 @@ export default function Chat({ navigation, route }) {
     setInput('')
   }
 
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <KeyboardAvoidingView
@@ -88,7 +92,9 @@ export default function Chat({ navigation, route }) {
         keyboardVerticalOffset={60}
       >
         <>
-        <ScrollView contentContainerStyle={{ paddingTop: 15 }}>
+        <ScrollView contentContainerStyle={{ paddingTop: 15 }}
+        ref={scrollViewRef}
+        onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}>
           {
             messages.map(({id, data}) => (
               data.email === auth.currentUser.email ? (

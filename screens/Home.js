@@ -16,6 +16,7 @@ Notifications.setNotificationHandler({
     }),
 });
 
+
 const Home = ({ navigation }) => {
 
     const [chats, setChats] = useState([]);
@@ -76,6 +77,10 @@ const Home = ({ navigation }) => {
             chatName: chatName
         });
     }
+
+    const notify = () => {
+        
+    }
     
     return (
         <SafeAreaView>
@@ -86,9 +91,6 @@ const Home = ({ navigation }) => {
                     <CustomListItem key={id} id={id} chatName={chatName} enterChat={enterChat} />
                 ))
             }
-            <TouchableOpacity onPress={() => sendNotificationToAllUsers({title: "Demo", body: "Test Notification"})}>
-                <Text>Send</Text>
-            </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>
     )
