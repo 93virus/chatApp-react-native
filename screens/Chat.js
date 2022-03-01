@@ -6,7 +6,6 @@ import { auth, db } from '../firebase';
 import firebase from 'firebase';
 import { sendMessagePushNotification } from '../ExpoNotification';
 
-
 export default function Chat({ navigation, route }) {
 
   const [input, setInput] = useState('');
@@ -83,7 +82,6 @@ export default function Chat({ navigation, route }) {
     setInput('')
   }
 
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <KeyboardAvoidingView
@@ -94,7 +92,8 @@ export default function Chat({ navigation, route }) {
         <>
         <ScrollView contentContainerStyle={{ paddingTop: 15 }}
         ref={scrollViewRef}
-        onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}>
+        onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}
+        >
           {
             messages.map(({id, data}) => (
               data.email === auth.currentUser.email ? (
@@ -154,6 +153,12 @@ export default function Chat({ navigation, route }) {
           onChangeText={(text) => setInput(text)} 
           value={input} 
           onSubmitEditing={sendMessage}
+          onPressIn={() => setTimeout(() => {
+            scrollViewRef.current.scrollToEnd({ animated: true })
+          }, 200)}
+          onFocus={() => setTimeout(() => {
+            scrollViewRef.current.scrollToEnd({ animated: true })
+          }, 0)}
           />
 
           <TouchableOpacity activeOpacity={0.5} onPress={sendMessage}>
