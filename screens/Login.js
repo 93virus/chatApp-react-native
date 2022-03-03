@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Image, Alert } from 'react-native';
 import { Button, Input } from 'react-native-elements';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
 import { Wave } from 'react-native-animated-spinkit'
 import Spinner from 'react-native-loading-spinner-overlay';
+import { UserContext } from '../context/UserContext';
 
 const Login = ({ navigation }) => {
+
+    const { saveUser } = useContext(UserContext);
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -24,7 +28,39 @@ const Login = ({ navigation }) => {
         setRender(false);
         const unsubscribe = auth.onAuthStateChanged((authUser) => {
             if (authUser) {
-                navigation.replace("Home");
+                if (!authUser.emailVerified) {
+                    Alert.alert("Verification", "Email is to be verified!", [
+                        {
+                            text: 'Ok',
+                            style: 'cancel',
+                            onPress: () => {
+                                setLoading(false)
+                                saveUser(null)
+                                auth.signOut();
+                            }
+                        },
+                        {
+                            text: 'Resend email',
+                            onPress: () => {
+                                setLoading(false)
+                                auth.currentUser.sendEmailVerification().then(() => auth.signOut())
+                            }
+                        }
+                    ])
+                } else {
+                    (async() => {
+                        await db.collection('users')
+                        .doc(auth.currentUser.uid)
+                        .get()
+                        .then(snapshot => {
+                            const data = snapshot.data()
+                            saveUser(data)
+                            setLoading(false)
+                            navigation.replace("Home");
+                        })
+                    })()
+                }
+
             } else {
                 setRender(true);
             }
@@ -55,9 +91,6 @@ const Login = ({ navigation }) => {
             return;
         }
         auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-            setLoading(false);
-        })
         .catch(err => {
             setLoading(false);
             switch(err.code) {

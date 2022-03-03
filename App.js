@@ -7,17 +7,20 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from './screens/Login';
 import Register from './screens/Register';
 import Home from './screens/Home';
-import AddChat from './screens/AddChat';
 import Chat from './screens/Chat';
 import './firebase';
 import { sendLocalNotification } from './ExpoNotification';
+import MyTabs from './screens/Home';
+import UserContextProvider from './context/UserContext';
+import Friends from './screens/Friends';
 
 const Stack = createNativeStackNavigator();
 
 const globalScreenOptions = {
   headerStyle: { backgroundColor: "#2C6BED" },
   headerTitleStyle: { color: "#fff" },
-  headerTintColor: "#fff"
+  headerTintColor: "#fff",
+  headerShadowVisible: false
 }
 
 Notifications.setNotificationHandler({
@@ -57,16 +60,18 @@ export default function App() {
   }
 
   return (
+    <UserContextProvider>
     <NavigationContainer>
       <Stack.Navigator screenOptions={globalScreenOptions}>
         <Stack.Screen name='Login' component={Login} />
         <Stack.Screen name='Register' component={Register} />
+        <Stack.Screen name='MyTabs' component={MyTabs} />
         <Stack.Screen name='Home' component={Home} />
-        <Stack.Screen name='AddChat' component={AddChat} />
+        <Stack.Screen name='Friends' component={Friends} />
         <Stack.Screen name='Chat' component={Chat} />
       </Stack.Navigator>
     </NavigationContainer>
-
+    </UserContextProvider>
   );
 }
 

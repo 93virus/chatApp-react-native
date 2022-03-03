@@ -4,7 +4,7 @@ import { View, StyleSheet, KeyboardAvoidingView, Platform, Image, TouchableHighl
 import { Button, Text, Input } from 'react-native-elements';
 import { Ionicons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { auth, storage, db } from '../firebase';
 import { Wave } from 'react-native-animated-spinkit'
@@ -21,6 +21,7 @@ const Register = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [imageUri, setImageUri] = useState('');
+    const [username, setUsername] = useState('');
     
     const [hidePassword, setHidePassword] = useState(true);
 
@@ -28,6 +29,7 @@ const Register = ({ navigation }) => {
     const [nameErr, setNameErr] = useState('');
     const [emailErr, setEmailErr] = useState('');
     const [passwordErr, setPasswordErr] = useState('');
+    const [usernameErr, setUsernameErr] = useState('');
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -49,10 +51,28 @@ const Register = ({ navigation }) => {
         return url;
     }
 
+    const userExists = async (username) => {
+        let userExists = true;
+        await db.collection('users')
+        .where('username', '==', username)
+        .limit(1)
+        .get()
+        .then(snapshot => {
+            if (snapshot.docs.length == 0) {
+                userExists = false;
+            } else {
+                setUsernameErr("Username already exists!")
+                userExists = true;
+            }
+        })
+        return userExists;
+    }
+
     const register = async () => {
         setEmailErr('');
         setNameErr('');
         setPasswordErr('');
+        setUsernameErr('');
         setLoading(true);
         let flag = 1;
         if (name == '') {   
@@ -67,12 +87,21 @@ const Register = ({ navigation }) => {
             setPasswordErr("Password is required!");
             flag = 0;
         }
+        if (username == '') {
+            setPhoneErr("Username is required!");
+            flag = 0;
+        }
         if (flag == 0) {
             setLoading(false);
             return;
         }
+        if (await userExists(username.toLowerCase())) {
+            setLoading(false)
+            return;
+        } else {
         await auth.createUserWithEmailAndPassword(email, password)
         .then(async (authUser) => {
+            auth.currentUser.sendEmailVerification();
             let url = "https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png?20170328184010"
             if (imageUri) {
                 url = await uploadImage(imageUri);
@@ -80,17 +109,22 @@ const Register = ({ navigation }) => {
             await authUser.user.updateProfile({
                 displayName: name.trim(),
                 photoURL: url
-            });
+            })
             await db.collection('users').doc(authUser.user.uid)
             .set({
                 'uid': authUser.user.uid,
                 'name': name.trim(),
                 'profileImg': url,
-                'email': email.trim()
+                'email': email.trim(),
+                'username': username.trim().toLowerCase(),
+                'friends': [],
+                'friendRequests': []
             })
         })
-        .then(() => {
+        .then(async() => {
+            await auth.signOut();
             setLoading(false);
+            navigation.navigate('Login')
         })
         .catch(err => {
             setLoading(false);
@@ -107,12 +141,13 @@ const Register = ({ navigation }) => {
                 default: alert(err.message);
             }
         })
+        }
     }
 
     return (
         <KeyboardAvoidingView style={styles.container}
         behavior={(Platform.OS == 'ios') ? "padding" : "height"}
-        keyboardVerticalOffset={90}>
+        keyboardVerticalOffset={150}>
             <StatusBar style='light' />
 
             <Text style={{ marginBottom: 40, fontSize: 30, color: '#566573' }}>Create an Account</Text>
@@ -139,6 +174,17 @@ const Register = ({ navigation }) => {
                     <MaterialIcons name="email" size={24} color="#99A3A4" />
                 }
                 errorMessage={emailErr}
+                />
+
+                <Input type="text" autoCapitalize='none'
+                placeholder='Username' 
+                value={username.trim()} 
+                onChangeText={(text) => setUsername(text.trim())}
+                leftIcon={
+                    <FontAwesome5 name="user-tag" size={20} color="#99A3A4" />
+                }
+                errorMessage={usernameErr}
+                maxLength={20}
                 />
 
                 <Input type="text" autoCapitalize='none' 
